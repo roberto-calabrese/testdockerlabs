@@ -5,7 +5,7 @@ source "$(pwd)/utils/spinner.sh"
 source "$(pwd)/utils/progress_bar.sh"
 
 
-ATTESA_GALERA_SEED=20
+ATTESA_GALERA_SEED=30
 
 
 ## FUNZIONI
@@ -65,6 +65,8 @@ next1() {
 next2() {
     echo -e "### AZIONO I NODI CLUSTER GALERA"
     docker service scale db_db=2
+    echo -e "### DISATTIVO IL DB SEED GALERA"
+    docker service scale db_db-seed=0
     next3
 }
 
@@ -84,24 +86,40 @@ next3(){
 }
 
 next4(){
-    cd ../
-    cd zabbix
+    cd ~/testdockerlabs/zabbix
+
     docker run -d -v /var/lib/mysql --name zabbix-db-storage busybox:latest
+
 
     docker run \
     -d \
-    --name zabbix \
+    --name dockbix-db \
+    -v /backups:/backups \
+    -v /etc/localtime:/etc/localtime:ro \
+    --volumes-from dockbix-db-storage \
+    --env="MARIADB_USER=zabbix" \
+    --env="MARIADB_PASS=my_password" \
+    monitoringartist/zabbix-db-mariadb
+
+
+    docker run \
+    -d \
+    --name dockbix \
     -p 8888:80 \
     -p 10051:10051 \
     -v /etc/localtime:/etc/localtime:ro \
-    --link zabbix-db:zabbix.db \
-    --env="ZS_DBHost=zabbix.db" \
+    --link dockbix-db:dockbix.db \
+    --env="ZS_DBHost=dockbix.db" \
     --env="ZS_DBUser=zabbix" \
     --env="ZS_DBPassword=my_password" \
-    monitoringartist/zabbix-xxl:latest
-    # wait ~60 seconds for Zabbix initialization
+    --env="XXL_zapix=true" \
+    --env="XXL_grapher=true" \
+    monitoringartist/dockbix-xxl:latest
+# Wait ~30 seconds for Zabbix initialization
+# Zabbix web will be available on the port 80, Zabbix server on the port 10051
+# Default credentials: Admin/zabbix
 
-    docker stack deploy -c docker-composer.yml zab
+    docker stack deploy -c docker-compose.yml zab
 
 }
 

@@ -19,6 +19,8 @@ services:
       - mysql_root_password
   db:
     image: hairyhenderson/mgs
+    ports:
+      - 3306:3006
     environment:
       - XTRABACKUP_PASSWORD_FILE=/run/secrets/xtrabackup_password
       - NODE_ADDRESS=eth0

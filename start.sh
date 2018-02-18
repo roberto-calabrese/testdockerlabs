@@ -54,7 +54,13 @@ next1() {
     docker stack deploy -c docker-compose.yml db
     echo -e "### CLUSTER GALERA OK"
 
-    checkDbSeed
+    if [ $(docker service ls | grep db_db  | awk '{print $4}') == 2/2 ]
+    then
+        echo "OK"
+        next2
+    else
+        checkDbSeed
+    fi
 
 }
 

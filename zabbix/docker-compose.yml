@@ -64,3 +64,6 @@ services:
       - ZA_ServerActive=zabbixserver
     deploy:
       mode: global
+      placement:
+        constraints:
+          - node.hostname!=manager1

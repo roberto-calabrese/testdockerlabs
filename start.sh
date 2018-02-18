@@ -1,12 +1,10 @@
 #!/bin/bash
 
-
-source "$(pwd)/utils/spinner.sh"
+#source "$(pwd)/utils/spinner.sh"
 source "$(pwd)/utils/progress_bar.sh"
 
 
 ATTESA_GALERA_SEED=30
-
 
 ## FUNZIONI
 
@@ -40,7 +38,6 @@ checkDbSeed () {
 }
 
 next1() {
-
     echo -e "### INSTALLO PORTAINER"
      docker service create \
     --name portainer \
@@ -96,42 +93,14 @@ next3(){
 }
 
 next4(){
+    echo -e "### INSTALLO ZABBIX SERVER + ZABBIX AGENT SU I NODI"
     cd ~/testdockerlabs/zabbix
-
-#    docker run -d -v /var/lib/mysql --name zabbix-db-storage busybox:latest
-#
-#    docker run \
-#    -d \
-#    --name zabbix-db \
-#    -v /backups:/backups \
-#    -v /etc/localtime:/etc/localtime:ro \
-#    --volumes-from zabbix-db-storage \
-#    --env="MARIADB_USER=zabbix" \
-#    --env="MARIADB_PASS=my_password" \
-#    monitoringartist/zabbix-db-mariadb
-#
-#
-#   docker run \
-#    -d \
-#    --name zabbix \
-#    -p 8888:80 \
-#    -p 10051:10051 \
-#    -v /etc/localtime:/etc/localtime:ro \
-#    --link zabbix-db:zabbix.db \
-#    --env="ZS_DBHost=zabbix.db" \
-#    --env="ZS_DBUser=zabbix" \
-#    --env="ZS_DBPassword=my_password" \
-#    monitoringartist/zabbix-xxl:latest
-# Wait ~30 seconds for Zabbix initialization
-# Zabbix web will be available on the port 80, Zabbix server on the port 10051
-# Default credentials: Admin/zabbix
-
     docker stack deploy -c docker-compose.yml zab
-
 }
 
-
 next1
+
+echo -e "### OPERAZIONI TERMINATE"
 
 
 

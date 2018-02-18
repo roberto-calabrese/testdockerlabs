@@ -63,11 +63,21 @@ next1() {
 
 
 next2() {
-    echo -e "### AZIONO I NODI CLUSTER GALERA"
-    docker service scale db_db=2
-    echo -e "### DISATTIVO IL DB SEED GALERA"
-    docker service scale db_db-seed=0
-    next3
+
+
+echo "### CONTROLLO CHE I NODI CLUSTER NON SIANO GIA' ATTIVI"
+
+if [ $(docker service ls | grep db_db  | awk '{print $4}') == 2/2 ]
+    then
+        echo "### NODI GIA' ATTIVI"
+        next3
+    else
+        echo -e "### AZIONO I NODI CLUSTER GALERA"
+        docker service scale db_db=2
+        echo -e "### DISATTIVO IL DB SEED GALERA"
+        docker service scale db_db-seed=0
+        next3
+    fi
 }
 
 
@@ -88,33 +98,30 @@ next3(){
 next4(){
     cd ~/testdockerlabs/zabbix
 
-    docker run -d -v /var/lib/mysql --name zabbix-db-storage busybox:latest
-
-
-    docker run \
-    -d \
-    --name dockbix-db \
-    -v /backups:/backups \
-    -v /etc/localtime:/etc/localtime:ro \
-    --volumes-from dockbix-db-storage \
-    --env="MARIADB_USER=zabbix" \
-    --env="MARIADB_PASS=my_password" \
-    monitoringartist/zabbix-db-mariadb
-
-
-    docker run \
-    -d \
-    --name dockbix \
-    -p 8888:80 \
-    -p 10051:10051 \
-    -v /etc/localtime:/etc/localtime:ro \
-    --link dockbix-db:dockbix.db \
-    --env="ZS_DBHost=dockbix.db" \
-    --env="ZS_DBUser=zabbix" \
-    --env="ZS_DBPassword=my_password" \
-    --env="XXL_zapix=true" \
-    --env="XXL_grapher=true" \
-    monitoringartist/dockbix-xxl:latest
+#    docker run -d -v /var/lib/mysql --name zabbix-db-storage busybox:latest
+#
+#    docker run \
+#    -d \
+#    --name zabbix-db \
+#    -v /backups:/backups \
+#    -v /etc/localtime:/etc/localtime:ro \
+#    --volumes-from zabbix-db-storage \
+#    --env="MARIADB_USER=zabbix" \
+#    --env="MARIADB_PASS=my_password" \
+#    monitoringartist/zabbix-db-mariadb
+#
+#
+#   docker run \
+#    -d \
+#    --name zabbix \
+#    -p 8888:80 \
+#    -p 10051:10051 \
+#    -v /etc/localtime:/etc/localtime:ro \
+#    --link zabbix-db:zabbix.db \
+#    --env="ZS_DBHost=zabbix.db" \
+#    --env="ZS_DBUser=zabbix" \
+#    --env="ZS_DBPassword=my_password" \
+#    monitoringartist/zabbix-xxl:latest
 # Wait ~30 seconds for Zabbix initialization
 # Zabbix web will be available on the port 80, Zabbix server on the port 10051
 # Default credentials: Admin/zabbix

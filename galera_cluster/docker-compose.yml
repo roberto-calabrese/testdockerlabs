@@ -1,0 +1,41 @@
+version: '3.1'
+
+services:
+  db-seed:
+    image: hairyhenderson/mgs
+    environment:
+      - XTRABACKUP_PASSWORD_FILE=/run/secrets/xtrabackup_password
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD_FILE=/run/secrets/mysql_password
+      - MYSQL_DATABASE=database
+      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/mysql_root_password
+      - NODE_ADDRESS=eth0
+    command: seed
+    volumes:
+      - dbVol:/var/lib/mysql
+    secrets:
+      - xtrabackup_password
+      - mysql_password
+      - mysql_root_password
+  db:
+    image: hairyhenderson/mgs
+    environment:
+      - XTRABACKUP_PASSWORD_FILE=/run/secrets/xtrabackup_password
+      - NODE_ADDRESS=eth0
+    command: node db-seed,db
+    deploy:
+      replicas: 0
+    secrets:
+      - xtrabackup_password
+
+volumes:
+  dbVol:
+    driver: local
+
+secrets:
+  xtrabackup_password:
+    file: secrets/xtrabackup_password
+  mysql_password:
+    file: secrets/mysql_password
+  mysql_root_password:
+    file: secrets/mysql_root_password

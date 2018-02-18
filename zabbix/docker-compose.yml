@@ -1,0 +1,32 @@
+version: '3.1'
+
+services:
+#  zabbix-server:
+#    image: monitoringartist/zabbix-3.0-xxl:latest
+#    environment:
+#      - ZS_DBHost=zabbix.db
+#      - ZS_DBUser=zabbix
+#      - ZS_DBPassword=my_password
+#      - XXL_zapix=true
+#      - XXL_grapher=true
+#      - XXL_apiuser=Admin
+#      - XXL_apipass=zabbix
+#    links:
+#      - zabbix-db:zabbix.db
+#    ports:
+#      - 8888:80
+#    volumes:
+#      - dbZabbix:/var/lib/mysql
+#    deploy:
+#      replicas: 1
+  zabbix-agent:
+    image: monitoringartist/dockbix-agent-xxl-limited:latest
+    network_mode: "host"
+    volumes:
+      - /:/rootfs
+      - /var/run:/var/run
+    environment:
+      - ZA_Server=192.168.0.121
+      - ZA_ServerActive=192.168.0.121
+    deploy:
+      mode: global

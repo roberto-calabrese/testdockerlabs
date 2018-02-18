@@ -34,7 +34,7 @@ checkDbSeed () {
         #start_spinner "attendo ${ATTESA_GALERA_SEED} secondi per riprovare"
         #sleep ${ATTESA_GALERA_SEED}
         #stop_spinner $?
-        progress_bar ${ATTESA_GALERA_SEED}
+        progress-bar ${ATTESA_GALERA_SEED}
         checkDbSeed
     fi
 }
@@ -80,6 +80,28 @@ next3(){
     SLACK_CHANNEL=devops-alerts \
     SLACK_USER=alertmanager \
     docker stack deploy -c docker-compose.yml mon
+    next4
+}
+
+next4(){
+    cd ../
+    cd zabbix
+    docker run -d -v /var/lib/mysql --name zabbix-db-storage busybox:latest
+
+    docker run \
+    -d \
+    --name zabbix \
+    -p 8888:80 \
+    -p 10051:10051 \
+    -v /etc/localtime:/etc/localtime:ro \
+    --link zabbix-db:zabbix.db \
+    --env="ZS_DBHost=zabbix.db" \
+    --env="ZS_DBUser=zabbix" \
+    --env="ZS_DBPassword=my_password" \
+    monitoringartist/zabbix-xxl:latest
+    # wait ~60 seconds for Zabbix initialization
+
+    docker stack deploy -c docker-composer.yml zab
 
 }
 
